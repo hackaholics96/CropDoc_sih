@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduGame - Login</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1F2937;
+            background: linear-gradient(135deg, #F0FDF4 0%, #ECFDF5 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 500px;
+            width: 100%;
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .app-logo {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            color: #059669;
+        }
+
+        .app-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #059669;
+            margin-bottom: 0.5rem;
+        }
+
+        .app-subtitle {
+            color: #6B7280;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+
+        .login-options {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .login-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .student-btn {
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            color: white;
+        }
+
+        .student-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .teacher-btn {
+            background: white;
+            color: #059669;
+            border-color: #10B981;
+        }
+
+        .teacher-btn:hover {
+            background: #F0FDF4;
+            transform: translateY(-2px);
+        }
+
+        .login-form {
+            display: none;
+            text-align: left;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .form-title {
+            color: #059669;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            font-size: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid #E5E7EB;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #10B981;
+        }
+
+        .language-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .language-btn {
+            padding: 0.75rem;
+            background: white;
+            border: 2px solid #E5E7EB;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .language-btn:hover, .language-btn.selected {
+            background: #ECFDF5;
+            border-color: #10B981;
+            color: #059669;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 1rem;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            color: #6B7280;
+            text-decoration: none;
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            color: #059669;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 500px) {
+            .container {
+                padding: 1.5rem;
+            }
+            
+            .app-title {
+                font-size: 2rem;
+            }
+            
+            .language-options {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Main Login Selection -->
+        <div id="main-login">
+            <div class="app-logo">🎓</div>
+            <h1 class="app-title">EduGame</h1>
+            <p class="app-subtitle">Learning Made Fun</p>
+            
+            <div class="login-options">
+                <button class="login-btn student-btn" onclick="showStudentLogin()">
+                    <i class="fas fa-user-graduate"></i>
+                    Student Login
+                </button>
+                <button class="login-btn teacher-btn" onclick="showTeacherLogin()">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                    Teacher Login
+                </button>
+            </div>
+        </div>
+        
+        <!-- Student Login Form -->
+        <div id="student-login" class="login-form">
+            <div class="back-btn" onclick="showMainLogin()">
+                <i class="fas fa-arrow-left"></i> Back
+            </div>
+            
+            <h2 class="form-title">Student Login</h2>
+            
+            <div class="form-group">
+                <label for="student-username">Username</label>
+                <input type="text" id="student-username" placeholder="Enter your username">
+            </div>
+            
+            <div class="form-group">
+                <label for="student-phone">Phone Number</label>
+                <input type="tel" id="student-phone" placeholder="Enter your phone number">
+            </div>
+            
+            <div class="form-group">
+                <label for="student-password">Password</label>
+                <input type="password" id="student-password" placeholder="Enter your password">
+            </div>
+            
+            <div class="form-group">
+                <label>Choose Language</label>
+                <div class="language-options">
+                    <button class="language-btn" onclick="selectLanguage(this, 'English')">English</button>
+                    <button class="language-btn" onclick="selectLanguage(this, 'Tamil')">Tamil</button>
+                    <button class="language-btn" onclick="selectLanguage(this, 'Hindi')">Hindi</button>
+                    <button class="language-btn" onclick="selectLanguage(this, 'Odia')">Odia</button>
+                </div>
+                <input type="hidden" id="selected-language">
+            </div>
+            
+            <button class="submit-btn" onclick="studentLogin()">Login</button>
+        </div>
+        
+        <!-- Teacher Login Form -->
+        <div id="teacher-login" class="login-form">
+            <div class="back-btn" onclick="showMainLogin()">
+                <i class="fas fa-arrow-left"></i> Back
+            </div>
+            
+            <h2 class="form-title">Teacher Login</h2>
+            
+            <div class="form-group">
+                <label for="teacher-username">Username</label>
+                <input type="text" id="teacher-username" placeholder="Enter your username">
+            </div>
+            
+            <div class="form-group">
+                <label for="teacher-phone">Phone Number</label>
+                <input type="tel" id="teacher-phone" placeholder="Enter your phone number">
+            </div>
+            
+            <div class="form-group">
+                <label for="teacher-password">Password</label>
+                <input type="password" id="teacher-password" placeholder="Enter your password">
+            </div>
+            
+            <button class="submit-btn" onclick="teacherLogin()">Login</button>
+        </div>
+    </div>
+
+    <script>
+        // Show/hide login forms
+        function showMainLogin() {
+            document.getElementById('main-login').style.display = 'block';
+            document.getElementById('student-login').style.display = 'none';
+            document.getElementById('teacher-login').style.display = 'none';
+        }
+        
+        function showStudentLogin() {
+            document.getElementById('main-login').style.display = 'none';
+            document.getElementById('student-login').style.display = 'block';
+            document.getElementById('teacher-login').style.display = 'none';
+        }
+        
+        function showTeacherLogin() {
+            document.getElementById('main-login').style.display = 'none';
+            document.getElementById('student-login').style.display = 'none';
+            document.getElementById('teacher-login').style.display = 'block';
+        }
+        
+        // Language selection
+        function selectLanguage(button, language) {
+            // Remove selected class from all buttons
+            document.querySelectorAll('.language-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            // Add selected class to clicked button
+            button.classList.add('selected');
+            
+            // Set the selected language
+            document.getElementById('selected-language').value = language;
+        }
+        
+        // Login functions
+        function studentLogin() {
+            const username = document.getElementById('student-username').value;
+            const phone = document.getElementById('student-phone').value;
+            const password = document.getElementById('student-password').value;
+            const language = document.getElementById('selected-language').value;
+            
+            // Basic validation
+            if (!username || !phone || !password || !language) {
+                alert('Please fill all fields and select a language');
+                return;
+            }
+            
+            // Redirect to student dashboard (index.html)
+            // REPLACE THIS URL WITH YOUR ACTUAL STUDENT DASHBOARD URL
+            window.location.href = 'index.html';
+        }
+        
+        function teacherLogin() {
+            const username = document.getElementById('teacher-username').value;
+            const phone = document.getElementById('teacher-phone').value;
+            const password = document.getElementById('teacher-password').value;
+            
+            // Basic validation
+            if (!username || !phone || !password) {
+                alert('Please fill all fields');
+                return;
+            }
+            
+            // Redirect to teacher dashboard
+            // REPLACE THIS URL WITH YOUR ACTUAL TEACHER DASHBOARD URL
+            window.location.href = 'teacher-dashboard.html';
+        }
+    </script>
+</body>
+</html>
