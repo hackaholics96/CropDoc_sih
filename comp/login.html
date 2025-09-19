@@ -3,363 +3,481 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EduGame - Login</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>CropDoc - OTP Verification</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            line-height: 1.6;
-            color: #1F2937;
-            background: linear-gradient(135deg, #F0FDF4 0%, #ECFDF5 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.8)), 
+                        url('https://images.unsplash.com/photo-1500937386664-56d1dfef3854?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2000&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
         }
-
-        .container {
-            max-width: 500px;
-            width: 100%;
-            background: white;
-            border-radius: 16px;
-            padding: 2rem;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        }
-
-        .app-logo {
-            font-size: 3.5rem;
-            margin-bottom: 1rem;
-            color: #059669;
-        }
-
-        .app-title {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: #059669;
-            margin-bottom: 0.5rem;
-        }
-
-        .app-subtitle {
-            color: #6B7280;
-            margin-bottom: 2rem;
-            font-size: 1.1rem;
-        }
-
-        .login-options {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .login-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.75rem;
-            padding: 1rem 2rem;
-            border-radius: 12px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
+        
+        .form-card {
             transition: all 0.3s ease;
-            border: 2px solid transparent;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
         }
-
-        .student-btn {
-            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
-            color: white;
+        
+        .input-field {
+            transition: all 0.3s ease;
         }
-
-        .student-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(16, 185, 129, 0.3);
+        
+        .input-field:focus {
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.3);
         }
-
-        .teacher-btn {
-            background: white;
-            color: #059669;
-            border-color: #10B981;
+        
+        .language-indicator {
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
-
-        .teacher-btn:hover {
-            background: #F0FDF4;
-            transform: translateY(-2px);
-        }
-
-        .login-form {
-            display: none;
-            text-align: left;
-            animation: fadeIn 0.5s ease;
-        }
-
-        .form-title {
-            color: #059669;
-            margin-bottom: 1.5rem;
+        
+        .otp-input {
+            width: 60px;
+            height: 60px;
             text-align: center;
-            font-size: 1.5rem;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            color: #374151;
-        }
-
-        input, select {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            border: 2px solid #E5E7EB;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: border-color 0.3s;
-        }
-
-        input:focus, select:focus {
-            outline: none;
-            border-color: #10B981;
-        }
-
-        .language-options {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 0.75rem;
-            margin-top: 0.5rem;
-        }
-
-        .language-btn {
-            padding: 0.75rem;
-            background: white;
-            border: 2px solid #E5E7EB;
-            border-radius: 8px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .language-btn:hover, .language-btn.selected {
-            background: #ECFDF5;
-            border-color: #10B981;
-            color: #059669;
-        }
-
-        .submit-btn {
-            width: 100%;
-            padding: 1rem;
-            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.1rem;
+            font-size: 24px;
             font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-top: 1rem;
+            border: 2px solid #D1D5DB;
+            border-radius: 12px;
+            transition: all 0.3s ease;
         }
-
-        .submit-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(16, 185, 129, 0.3);
+        
+        .otp-input:focus {
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.3);
+            outline: none;
         }
-
-        .back-btn {
-            display: inline-flex;
-            align-items: center;
-            color: #6B7280;
-            text-decoration: none;
-            font-weight: 500;
-            margin-bottom: 1.5rem;
-            cursor: pointer;
+        
+        .otp-input.filled {
+            border-color: #4CAF50;
+            background-color: #F0FDF4;
         }
-
-        .back-btn:hover {
-            color: #059669;
+        
+        .success-overlay {
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.5s ease;
         }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        
+        .success-overlay.active {
+            opacity: 1;
+            visibility: visible;
         }
-
-        @media (max-width: 500px) {
-            .container {
+        
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        .floating {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @media (max-width: 640px) {
+            .form-container {
                 padding: 1.5rem;
             }
             
-            .app-title {
-                font-size: 2rem;
-            }
-            
-            .language-options {
-                grid-template-columns: 1fr;
+            .otp-input {
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
             }
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <!-- Main Login Selection -->
-        <div id="main-login">
-            <div class="app-logo">🎓</div>
-            <h1 class="app-title">EduGame</h1>
-            <p class="app-subtitle">Learning Made Fun</p>
-            
-            <div class="login-options">
-                <button class="login-btn student-btn" onclick="showStudentLogin()">
-                    <i class="fas fa-user-graduate"></i>
-                    Student Login
-                </button>
-                <button class="login-btn teacher-btn" onclick="showTeacherLogin()">
-                    <i class="fas fa-chalkboard-teacher"></i>
-                    Teacher Login
-                </button>
-            </div>
+<body class="min-h-screen flex items-center justify-center p-4 py-10">
+    <div class="w-full max-w-md mx-auto">
+        <!-- Language Indicator -->
+        <div class="language-indicator rounded-full py-2 px-4 flex items-center justify-center mb-6 w-max mx-auto">
+            <span class="text-green-600 font-medium mr-2" id="current-language">English</span>
+            <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
         </div>
-        
-        <!-- Student Login Form -->
-        <div id="student-login" class="login-form">
-            <div class="back-btn" onclick="showMainLogin()">
-                <i class="fas fa-arrow-left"></i> Back
+
+        <!-- Form Container -->
+        <div class="form-card bg-white rounded-2xl overflow-hidden">
+            <!-- Header -->
+            <div class="bg-green-600 text-white p-6 text-center">
+                <h1 class="text-2xl font-bold" id="form-title">OTP Verification</h1>
+                <p class="mt-2 opacity-90" id="form-subtitle">Please enter the 4 digit OTP to proceed further</p>
             </div>
             
-            <h2 class="form-title">Student Login</h2>
-            
-            <div class="form-group">
-                <label for="student-username">Username</label>
-                <input type="text" id="student-username" placeholder="Enter your username">
-            </div>
-            
-            <div class="form-group">
-                <label for="student-phone">Phone Number</label>
-                <input type="tel" id="student-phone" placeholder="Enter your phone number">
-            </div>
-            
-            <div class="form-group">
-                <label for="student-password">Password</label>
-                <input type="password" id="student-password" placeholder="Enter your password">
-            </div>
-            
-            <div class="form-group">
-                <label>Choose Language</label>
-                <div class="language-options">
-                    <button class="language-btn" onclick="selectLanguage(this, 'English')">English</button>
-                    <button class="language-btn" onclick="selectLanguage(this, 'Tamil')">Tamil</button>
-                    <button class="language-btn" onclick="selectLanguage(this, 'Hindi')">Hindi</button>
-                    <button class="language-btn" onclick="selectLanguage(this, 'Odia')">Odia</button>
+            <!-- Form -->
+            <div class="form-container p-6">
+                <div class="flex justify-center space-x-4 mb-8">
+                    <input type="text" maxlength="1" class="otp-input floating" id="otp1" oninput="moveToNext(this, 'otp2')">
+                    <input type="text" maxlength="1" class="otp-input" id="otp2" oninput="moveToNext(this, 'otp3')">
+                    <input type="text" maxlength="1" class="otp-input" id="otp3" oninput="moveToNext(this, 'otp4')">
+                    <input type="text" maxlength="1" class="otp-input" id="otp4" oninput="moveToNext(this, 'verify-btn')">
                 </div>
-                <input type="hidden" id="selected-language">
+                
+                <!-- Verify Button -->
+                <button id="verify-btn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 flex items-center justify-center shadow-md">
+                    <span id="verify-text">Verify OTP</span>
+                    <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </button>
+                
+                <!-- Resend OTP -->
+                <div class="text-center mt-6">
+                    <p class="text-gray-600 text-sm" id="resend-text">Didn't receive the OTP? <button class="text-green-600 hover:text-green-800 font-medium" id="resend-btn">Resend OTP</button></p>
+                </div>
             </div>
-            
-            <button class="submit-btn" onclick="studentLogin()">Login</button>
         </div>
         
-        <!-- Teacher Login Form -->
-        <div id="teacher-login" class="login-form">
-            <div class="back-btn" onclick="showMainLogin()">
-                <i class="fas fa-arrow-left"></i> Back
+        <!-- Back button -->
+        <div class="text-center mt-6">
+            <button id="back-btn" class="text-green-600 hover:text-green-800 font-medium flex items-center justify-center mx-auto">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                <span id="back-text">Back to home page</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Success Overlay -->
+    <div class="success-overlay fixed inset-0 bg-green-800 bg-opacity-95 flex items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-8 max-w-md mx-4 text-center">
+            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
             </div>
-            
-            <h2 class="form-title">Teacher Login</h2>
-            
-            <div class="form-group">
-                <label for="teacher-username">Username</label>
-                <input type="text" id="teacher-username" placeholder="Enter your username">
-            </div>
-            
-            <div class="form-group">
-                <label for="teacher-phone">Phone Number</label>
-                <input type="tel" id="teacher-phone" placeholder="Enter your phone number">
-            </div>
-            
-            <div class="form-group">
-                <label for="teacher-password">Password</label>
-                <input type="password" id="teacher-password" placeholder="Enter your password">
-            </div>
-            
-            <button class="submit-btn" onclick="teacherLogin()">Login</button>
+            <h2 class="text-xl font-bold text-gray-800 mb-2" id="success-title">Success</h2>
+            <p class="text-gray-600 mb-6" id="success-message">Your account has been successfully created</p>
+            <button id="success-btn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300">
+                Continue to Dashboard
+            </button>
         </div>
     </div>
 
     <script>
-        // Show/hide login forms
-        function showMainLogin() {
-            document.getElementById('main-login').style.display = 'block';
-            document.getElementById('student-login').style.display = 'none';
-            document.getElementById('teacher-login').style.display = 'none';
-        }
-        
-        function showStudentLogin() {
-            document.getElementById('main-login').style.display = 'none';
-            document.getElementById('student-login').style.display = 'block';
-            document.getElementById('teacher-login').style.display = 'none';
-        }
-        
-        function showTeacherLogin() {
-            document.getElementById('main-login').style.display = 'none';
-            document.getElementById('student-login').style.display = 'none';
-            document.getElementById('teacher-login').style.display = 'block';
-        }
-        
-        // Language selection
-        function selectLanguage(button, language) {
-            // Remove selected class from all buttons
-            document.querySelectorAll('.language-btn').forEach(btn => {
-                btn.classList.remove('selected');
+        document.addEventListener('DOMContentLoaded', function() {
+            // Language data with translations
+            const languages = {
+                english: {
+                    name: "English",
+                    title: "OTP Verification",
+                    subtitle: "Please enter the 4 digit OTP to proceed further",
+                    verifyText: "Verify OTP",
+                    resendText: "Didn't receive the OTP?",
+                    resendBtn: "Resend OTP",
+                    backText: "Back to home page",
+                    success: {
+                        title: "Success",
+                        message: "Your account has been successfully created"
+                    }
+                },
+                tamil: {
+                    name: "தமிழ்",
+                    title: "OTP சரிபார்ப்பு",
+                    subtitle: "மேலும் தொடர 4 இலக்க OTP ஐ உள்ளிடவும்",
+                    verifyText: "OTP சரிபார்க்கவும்",
+                    resendText: "OTP பெறவில்லையா?",
+                    resendBtn: "OTP மீண்டும் அனுப்பவும்",
+                    backText: "முகப்புப் பக்கத்திற்கு திரும்பு",
+                    success: {
+                        title: "வெற்றி",
+                        message: "உங்கள் கணக்கு வெற்றிகரமாக உருவாக்கப்பட்டது"
+                    }
+                },
+                hindi: {
+                    name: "हिन्दी",
+                    title: "OTP सत्यापन",
+                    subtitle: "आगे बढ़ने के लिए कृपया 4 अंकों का OTP दर्ज करें",
+                    verifyText: "OTP सत्यापित करें",
+                    resendText: "OTP प्राप्त नहीं हुआ?",
+                    resendBtn: "OTP पुनः भेजें",
+                    backText: "मुखपृष्ठ पर वापस",
+                    success: {
+                        title: "सफलता",
+                        message: "आपका खाता सफलतापूर्वक बनाया गया है"
+                    }
+                },
+                bengali: {
+                    name: "বাংলা",
+                    title: "OTP যাচাইকরণ",
+                    subtitle: "এগিয়ে যেতে 4 অঙ্কের OTP লিখুন",
+                    verifyText: "OTP যাচাই করুন",
+                    resendText: "OTP পাননি?",
+                    resendBtn: "OTP পুনরায়发送 করুন",
+                    backText: "হোম পেজে ফিরে যান",
+                    success: {
+                        title: "সাফল্য",
+                        message: "আপনার অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে"
+                    }
+                },
+                punjabi: {
+                    name: "ਪੰਜਾਬੀ",
+                    title: "OTP ਪੁਸ਼ਟੀਕਰਨ",
+                    subtitle: "ਅੱਗੇ ਵਧਣ ਲਈ 4 ਅੰਕਾਂ ਵਾਲਾ OTP ਦਰਜ ਕਰੋ",
+                    verifyText: "OTP ਪੁਸ਼ਟੀ ਕਰੋ",
+                    resendText: "OTP ਪ੍ਰਾਪਤ ਨਹੀਂ ਹੋਇਆ?",
+                    resendBtn: "OTP ਮੁੜ ਭੇਜੋ",
+                    backText: "ਹੋਮ ਪੇਜ ਤੇ ਵਾਪਸ",
+                    success: {
+                        title: "ਸਫਲਤਾ",
+                        message: "ਤੁਹਾਡਾ ਖਾਤਾ ਕਾਮਯਾਬੀ ਨਾਲ ਬਣਾਇਆ ਗਿਆ ਹੈ"
+                    }
+                }
+            };
+
+            // Get selected language from URL parameter or default to English
+            const urlParams = new URLSearchParams(window.location.search);
+            const selectedLanguage = urlParams.get('lang') || 'english';
+            const langData = languages[selectedLanguage];
+
+            // Update page content with translations
+            document.getElementById('current-language').textContent = langData.name;
+            document.getElementById('form-title').textContent = langData.title;
+            document.getElementById('form-subtitle').textContent = langData.subtitle;
+            document.getElementById('verify-text').textContent = langData.verifyText;
+            document.getElementById('resend-text').innerHTML = `${langData.resendText} <button class="text-green-600 hover:text-green-800 font-medium" id="resend-btn">${langData.resendBtn}</button>`;
+            document.getElementById('back-text').textContent = langData.backText;
+
+            // Form submission
+            document.getElementById('verify-btn').addEventListener('click', function() {
+                const otp1 = document.getElementById('otp1').value;
+                const otp2 = document.getElementById('otp2').value;
+                const otp3 = document.getElementById('otp3').value;
+                const otp4 = document.getElementById('otp4').value;
+                
+                const otp = otp1 + otp2 + otp3 + otp4;
+                
+                // Simple validation
+                if (otp.length !== 4) {
+                    alert(langData.verifyText === "Verify OTP" 
+                        ? "Please enter a valid 4-digit OTP" 
+                        : langData.verifyText === "OTP सत्यापित करें" 
+                            ? "कृपया एक मान्य 4-अंकीय OTP दर्ज करें" 
+                            : langData.verifyText === "OTP சரிபார்க்கவும்" 
+                                ? "தயவுசெய்து செல்லுபடியாகும் 4 இலக்க OTP ஐ உள்ளிடவும்" 
+                                : langData.verifyText === "OTP যাচাই করুন" 
+                                    ? "একটি বৈধ 4-অঙ্কের OTP লিখুন" 
+                                    : langData.verifyText === "OTP ਪੁਸ਼ਟੀ ਕਰੋ" 
+                                        ? "ਕਿਰਪਾ ਕਰਕੇ ਇੱਕ ਵੈਧ 4-ਅੰਕ OTP ਦਰਜ ਕਰੋ" 
+                                        : "Please enter a valid 4-digit OTP");
+                    return;
+                }
+                
+                // In a real app, you would verify the OTP with your backend
+                // For demo purposes, we'll assume it's correct
+
+                const successTitle = document.getElementById('success-title');
+                const successMessage = document.getElementById('success-message');
+                
+                successTitle.textContent = langData.success.title;
+                successMessage.textContent = langData.success.message;
+                
+                // Show success overlay
+                document.querySelector('.success-overlay').classList.add('active');
             });
             
-            // Add selected class to clicked button
-            button.classList.add('selected');
+            // Resend OTP
+            document.addEventListener('click', function(e) {
+                if (e.target && e.target.id === 'resend-btn') {
+                    alert(langData.verifyText === "Verify OTP" 
+                        ? "OTP has been resent to your mobile number" 
+                        : langData.verifyText === "OTP सत्यापित करें" 
+                            ? "OTP आपके मोबाइल नंबर पर पुनः भेज दिया गया है" 
+                            : langData.verifyText === "OTP சரிபார்க்கவும்" 
+                                ? "OTP உங்கள் மொபைல் எண்ணுக்கு மீண்டும் அனுப்பப்பட்டுள்ளது" 
+                                : langData.verifyText === "OTP যাচাই করুন" 
+                                    ? "OTP আপনার মোবাইল নম্বরে পুনরায় পাঠানো হয়েছে" 
+                                    : langData.verifyText === "OTP ਪੁਸ਼ਟੀ ਕਰੋ" 
+                                        ? "OTP ਤੁਹਾਡੇ ਮੋਬਾਈਲ ਨੰਬਰ 'ਤੇ ਮੁੜ ਭੇਜ ਦਿੱਤਾ ਗਿਆ ਹੈ" 
+                                        : "OTP has been resent to your mobile number");
+                }
+            });
             
-            // Set the selected language
-            document.getElementById('selected-language').value = language;
-        }
+            // Success button
+            document.getElementById('success-btn').addEventListener('click', function() {
+                window.location.href = "dashboard.html";
+            });
+        });
+
+        // Select the Back button
+        const backBtn = document.getElementById("back-btn");
+
+        // Add click event
+        backBtn.addEventListener("click", function() {
+            // Redirect to home page
+            window.location.href = "Language-selection.html";
+        });
         
-        // Login functions
-        function studentLogin() {
-            const username = document.getElementById('student-username').value;
-            const phone = document.getElementById('student-phone').value;
-            const password = document.getElementById('student-password').value;
-            const language = document.getElementById('selected-language').value;
-            
-            // Basic validation
-            if (!username || !phone || !password || !language) {
-                alert('Please fill all fields and select a language');
-                return;
+        // Function to move to next input field
+        function moveToNext(current, nextFieldId) {
+            if (current.value.length >= current.maxLength) {
+                if (nextFieldId === 'verify-btn') {
+                    document.getElementById(nextFieldId).focus();
+                } else {
+                    document.getElementById(nextFieldId).focus();
+                }
             }
             
-            // Redirect to student dashboard (index.html)
-            // REPLACE THIS URL WITH YOUR ACTUAL STUDENT DASHBOARD URL
-            window.location.href = 'index.html';
+            // Add filled class if input has value
+            if (current.value.length > 0) {
+                current.classList.add('filled');
+            } else {
+                current.classList.remove('filled');
+            }
         }
         
-        function teacherLogin() {
-            const username = document.getElementById('teacher-username').value;
-            const phone = document.getElementById('teacher-phone').value;
-            const password = document.getElementById('teacher-password').value;
-            
-            // Basic validation
-            if (!username || !phone || !password) {
-                alert('Please fill all fields');
-                return;
-            }
-            
-            // Redirect to teacher dashboard
-            // REPLACE THIS URL WITH YOUR ACTUAL TEACHER DASHBOARD URL
-            window.location.href = 'teacher-dashboard.html';
-        }
+        // ...existing code...
+
+    /*
+      Client-only OTP demo:
+      - Generates a secure 4-digit OTP
+      - Stores it in sessionStorage with expiry and attempt count
+      - Resend cooldown and attempt-limit enforcement
+      - For demo: shows the OTP in a small notice (remove this for production)
+    */
+
+    // Config
+    const OTP_LENGTH = 4;
+    const OTP_TTL_MS = 5 * 60 * 1000; // 5 minutes
+    const RESEND_COOLDOWN_MS = 30 * 1000; // 30 seconds
+    const MAX_ATTEMPTS = 5;
+
+    // Utility: secure random 4-digit OTP
+    function generateOtp(len = OTP_LENGTH) {
+      const array = new Uint32Array(1);
+      window.crypto.getRandomValues(array);
+      const max = 10 ** len;
+      const n = array[0] % max;
+      return String(n).padStart(len, '0');
+    }
+
+    function saveOtpRecord(destination, otp) {
+      const record = { otp, createdAt: Date.now(), expiresAt: Date.now() + OTP_TTL_MS, attempts: 0 };
+      sessionStorage.setItem('otp_record:' + destination, JSON.stringify(record));
+    }
+    function loadOtpRecord(destination) {
+      const raw = sessionStorage.getItem('otp_record:' + destination);
+      return raw ? JSON.parse(raw) : null;
+    }
+    function removeOtpRecord(destination) {
+      sessionStorage.removeItem('otp_record:' + destination);
+    }
+
+    function showMessage(text, timeout = 20000) {
+      let msg = document.getElementById('demo-msg');
+      if (!msg) {
+        msg = document.createElement('div');
+        msg.id = 'demo-msg';
+        msg.style.marginTop = '12px';
+        msg.style.textAlign = 'center';
+        msg.style.fontSize = '0.95rem';
+        msg.style.color = '#064e3b';
+        document.querySelector('.form-container').appendChild(msg);
+      }
+      msg.textContent = text;
+      if (timeout) {
+        clearTimeout(msg._t);
+        msg._t = setTimeout(() => { if (msg) msg.textContent = ''; }, timeout);
+      }
+    }
+
+    function readOtpInputs() {
+      return ['otp1','otp2','otp3','otp4'].map(id => document.getElementById(id).value.trim()).join('');
+    }
+    function clearOtpInputs() {
+      ['otp1','otp2','otp3','otp4'].forEach(id => {
+        const el = document.getElementById(id);
+        el.value = '';
+        el.classList.remove('filled');
+      });
+      document.getElementById('otp1').focus();
+    }
+
+    const DEMO_DEST = 'demo-user';
+
+    function sendOtpDemo(showToast = true) {
+      const lastSend = sessionStorage.getItem('otp_last_send_time');
+      const now = Date.now();
+      if (lastSend && (now - Number(lastSend) < RESEND_COOLDOWN_MS)) {
+        const wait = Math.ceil((RESEND_COOLDOWN_MS - (now - Number(lastSend))) / 1000);
+        showMessage('Please wait ' + wait + 's before resending.');
+        return;
+      }
+
+      const otp = generateOtp();
+      saveOtpRecord(DEMO_DEST, otp);
+      sessionStorage.setItem('otp_last_send_time', String(now));
+      clearOtpInputs();
+      if (showToast) showMessage('Demo OTP: ' + otp + ' (valid for 5 min)');
+      console.log('--- Demo OTP for', DEMO_DEST, ':', otp, '(valid 5 minutes) ---');
+      document.getElementById('verify-btn').disabled = false;
+    }
+
+    function verifyOtpDemo() {
+      const rec = loadOtpRecord(DEMO_DEST);
+      if (!rec) return alert('No OTP requested. Click Resend OTP first.');
+      if (Date.now() > rec.expiresAt) { removeOtpRecord(DEMO_DEST); return alert('OTP expired. Resend.'); }
+      if (rec.attempts >= MAX_ATTEMPTS) { removeOtpRecord(DEMO_DEST); return alert('Too many attempts. Resend OTP.'); }
+
+      const entered = readOtpInputs();
+      if (entered.length !== OTP_LENGTH) return alert('Enter the ' + OTP_LENGTH + '-digit OTP.');
+      rec.attempts++;
+      sessionStorage.setItem('otp_record:' + DEMO_DEST, JSON.stringify(rec));
+      if (entered === rec.otp) {
+        removeOtpRecord(DEMO_DEST);
+        document.querySelector('.success-overlay').classList.add('active');
+      } else {
+        const triesLeft = MAX_ATTEMPTS - rec.attempts;
+        alert('Invalid OTP. ' + (triesLeft ? ('Attempts left: ' + triesLeft) : 'No attempts left.'));
+        if (!triesLeft) removeOtpRecord(DEMO_DEST); else clearOtpInputs();
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('otp1').focus();
+      ['otp1','otp2','otp3','otp4'].forEach((id,i,arr) => {
+        const el = document.getElementById(id);
+        el.addEventListener('input', () => {
+          if (el.value) el.classList.add('filled'); else el.classList.remove('filled');
+          if (el.value.length >= el.maxLength && arr[i+1]) document.getElementById(arr[i+1]).focus();
+        });
+        el.addEventListener('keydown', (ev) => {
+          if (ev.key === 'Backspace' && !el.value && arr[i-1]) document.getElementById(arr[i-1]).focus();
+        });
+      });
+      const resendBtn = document.getElementById('resend-btn');
+      resendBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        sendOtpDemo(true);
+        resendBtn.disabled = true;
+        setTimeout(() => { resendBtn.disabled = false; }, RESEND_COOLDOWN_MS);
+      });
+      document.getElementById('verify-btn').addEventListener('click', (e) => {
+        e.preventDefault(); verifyOtpDemo();
+      });
+      document.getElementById('success-btn').addEventListener('click', () => {
+        alert(langData.verifyText === "Verify OTP"
+                ?"Continuing to dashboard..."
+                :langData.verifyText === "OTP सत्यापित करें"
+                    ?"डैशबोर्ड पर जारी रखा जा रहा है..."
+                    :langData.verifyText === "OTP சரிபார்க்கவும்"
+                        ?"டாஷ்போர்டுக்கு தொடரப்படுகிறது..."
+                        :langData.verifyText === "OTP যাচাই করুন"
+                            ?"ড্যাশবোর্ডে এগিয়ে যাওয়া হচ্ছে..."
+                            :langData.verifyText === "OTP ਪੁਸ਼ਟੀ ਕਰੋ"
+                                ?"ਡੈਸ਼ਬੋਰਡ ਵੱਲ ਜਾਰੀ ਰੱਖਿਆ ਜਾ ਰਿਹਾ ਹੈ..."
+                                :"Continuing to dashboard...");
+      });
+      sendOtpDemo(true); // auto-send on load
+    });
+
+// ...existing code...
+
     </script>
 </body>
 </html>

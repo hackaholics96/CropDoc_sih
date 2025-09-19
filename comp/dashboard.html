@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>CropDoc - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+      /* Fixed/complete styles.css (only z-index/pointer corrections changed) */
+
+      /* Reset / base */
+      :root {
+          --sidebar-width: 250px;
+          --sidebar-bg: #ffffff;
+          --sidebar-shadow: 2px 0 10px rgba(0,0,0,0.1);
+      }
+
+      /* Body background and font (kept as original) */
+      body {
+          font-family: 'Poppins', sans-serif;
+          background: linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.8)),
+                      url('https://images.unsplash.com/photo-1500937386664-56d1dfef3854?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2000&q=80');
+          background-size: cover;
+          background-position: center;
+          background-attachment: fixed;
+      }
+
+      /* App wrapper uses flex so sidebar and main are in the same flow
+        Sidebar will shrink with main content when viewport changes */
+      .app-wrapper {
+          display: flex;
+          align-items: stretch;
+          min-height: 100vh;
+      }
+
+      /* Sidebar: not fixed anymore; uses flex-basis so it can shrink */
+      .sidebar {
+          flex: 0 0 var(--sidebar-width);
+          width: var(--sidebar-width);
+          min-height: 100vh;
+          background: var(--sidebar-bg);
+          box-shadow: var(--sidebar-shadow);
+          /* IMPORTANT: raise sidebar above overlay when open */
+          z-index: 70;
+          transition: transform 0.28s ease, width 0.28s ease;
+          overflow-y: auto;
+          position: relative; /* keep in document flow for desktop */
+          pointer-events: auto;
+      }
+
+      /* When the layout is narrow we will allow sidebar to be hidden via transform */
+      .sidebar.open {
+          transform: translateX(0);
+          /* ensure pointer events are enabled when open */
+          pointer-events: auto;
+      }
+
+      .sidebar-content {
+          padding: 20px;
+      }
+
+      .sidebar-logo {
+          display: flex;
+          align-items: center;
+          margin-bottom: 30px;
+          padding: 10px;
+      }
+
+      .sidebar-nav {
+          list-style: none;
+          padding: 0;
+          margin: 0;
+      }
+
+      .sidebar-nav li {
+          margin-bottom: 5px;
+      }
+
+      .sidebar-nav a {
+          display: flex;
+          align-items: center;
+          padding: 12px 15px;
+          color: #4B5563;
+          text-decoration: none;
+          border-radius: 8px;
+          transition: all 0.3s;
+      }
+
+      .sidebar-nav a:hover {
+          background-color: #F3F4F6;
+          color: #065F46;
+      }
+
+      .sidebar-nav a.active {
+          background-color: #10B981;
+          color: white;
+      }
+
+      .sidebar-nav svg {
+          margin-right: 12px;
+          width: 20px;
+          height: 20px;
+      }
+
+      /* Main content: flex-grow to fill remaining space */
+      .main-content {
+          flex: 1 1 auto;
+          margin: 0;
+          transition: margin-left 0.3s ease, width 0.3s ease;
+          max-width: 100%;
+          box-sizing: border-box;
+      }
+
+      /* Dashboard cards and extras */
+      .dashboard-card {
+          transition: all 0.3s ease;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .dashboard-card:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+      }
+
+      .weather-card {
+          background: linear-gradient(135deg, #4CAF50, #2E7D32);
+          color: white;
+      }
+
+      /* Scroll top and voice buttons */
+      .scroll-top-btn {
+          position: fixed;
+          bottom: 20px;
+          right: 20px;
+          background: #4CAF50;
+          color: white;
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+          z-index: 99;
+          opacity: 0;
+          transition: opacity 0.3s ease;
+      }
+
+      .scroll-top-btn.visible {
+          opacity: 1;
+      }
+
+      .voice-btn {
+          position: fixed;
+          bottom: 20px;
+          right: 70px;
+          background: #000000;
+          color: white;
+          width: 50px;
+          height: 50px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+          z-index: 99;
+          transition: all 0.3s ease;
+      }
+
+      .voice-btn:hover {
+          transform: scale(1.1);
+      }
+
+      .voice-btn.listening {
+          animation: pulse 1.5s infinite;
+      }
+
+      @keyframes pulse {
+          0% { transform: scale(1); }
+          50% { transform: scale(1.1); }
+          100% { transform: scale(1); }
+      }
+
+      /* Mobile menu button */
+      /* keep hamburger on top of overlay and sidebar */
+      .mobile-menu-btn {
+          display: none;
+          position: fixed;
+          top: 15px;
+          left: 15px;
+          z-index: 90; /* higher than sidebar and overlay */
+          background: white;
+          border: none;
+          border-radius: 8px;
+          padding: 8px;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      /* Overlay for mobile */
+      .sidebar-overlay {
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: rgba(0, 0, 0, 0.5);
+          z-index: 60; /* must be lower than sidebar (70) but above main content */
+          pointer-events: auto;
+      }
+
+      /* RESPONSIVE BEHAVIOR */
+
+      /* At widths <= 1024px allow the sidebar to shrink smaller than basis */
+      @media (max-width: 1024px) {
+          .sidebar {
+              flex-basis: 220px;
+              width: 220px;
+          }
+      }
+
+      /* Mobile: hide sidebar by translating it off-canvas.
+        Show mobile menu button and overlay when sidebar is open. */
+      @media (max-width: 768px) {
+          /* show hamburger */
+          .mobile-menu-btn {
+              display: block;
+          }
+
+          /* Off-canvas sidebar */
+          .sidebar {
+              position: fixed;     /* overlay behavior */
+              top: 0;
+              left: 0;
+              transform: translateX(-110%);
+              width: var(--sidebar-width);
+              flex: 0 0 var(--sidebar-width);
+              transition: transform 0.28s ease;
+              height: 100vh;
+              /* z-index already set above (70) */
+          }
+
+          /* When "open" class is present, bring sidebar into view */
+          .sidebar.open {
+              transform: translateX(0);
+              /* ensure it's above overlay and interactive */
+              z-index: 70;
+              pointer-events: auto;
+          }
+
+          /* Overlay when active */
+          .sidebar-overlay.active {
+              display: block;
+          }
+
+          /* main content fills full width */
+          .main-content {
+              margin-left: 0;
+          }
+      }
+
+      /* Keep other original utilities for inner elements intact (no content changes) */
+
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Mobile Menu Button -->
+    <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Open menu">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+             xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+    </button>
+
+    <!-- Overlay for mobile -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <!-- Layout wrapper using flex so sidebar shrinks with main -->
+    <div class="app-wrapper">
+
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-content">
+                <div class="sidebar-logo">
+                    <div class="bg-green-600 text-white rounded-xl p-2 mr-3">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                             xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11"></path>
+                        </svg>
+                    </div>
+                    <h1 class="text-xl font-bold text-green-800">CropDoc</h1>
+                </div>
+
+                <ul class="sidebar-nav">
+                    <li>
+                        <a href="#" class="active">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                 xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                            </svg>
+                            <span id="nav-dashboard">Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="market.html">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                 xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                            </svg>
+                            <span id="nav-market">Market Prices</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                 xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                            </svg>
+                            <span id="nav-pest">Pest Detection</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                 xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                            </svg>
+                            <span id="nav-fertilizer">Fertilizer Guide</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                 xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                            </svg>
+                            <span id="nav-alerts">Alerts</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                            </svg>
+                            <span id="nav-recommendation">Crop Recommendation</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                 xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+                            </svg>
+                            <span id="nav-chatbot">SMS Chatbot</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                 xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span id="nav-history">Crop History</span>
+                        </a>
+                    </li>
+                    <li>
+                      <a href="#">
+                        <!-- Traditional gear icon -->
+                          <svg xmlns="http://www.w3.org/2000/svg" 
+                            class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19.14,12.94c.04-.31.06-.63.06-.94s-.02-.63-.06-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.61-.22l-2.39.96a7.007 7.007 0 0 0-1.63-.94l-.36-2.54A.5.5 0 0 0 14.4,2h-4.8a.5.5 0 0 0-.49.42l-.36,2.54c-.6.24-1.15.55-1.63.94l-2.39-.96a.5.5 0 0 0-.61.22L2.28,8.84a.5.5 0 0 0,.12.64l2.03,1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03,1.58a.5.5 0 0 0-.12.64l1.92,3.32c.14.24.43.34.69.22l2.39-.96c.48.39,1.03.7,1.63.94l.36,2.54c.04.25.25.42.49.42h4.8c.24,0,.45-.18.49-.42l.36-2.54c.6-.24,1.15-.55,1.63-.94l2.39.96c.26.11.55.02.69-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58ZM12,15.5c-1.93,0-3.5-1.57-3.5-3.5s1.57-3.5,3.5-3.5,3.5,1.57,3.5,3.5-1.57,3.5-3.5,3.5Z"/>
+                          </svg>
+                          <span id="nav-settings">Settings</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="#" id="nav-logout" style="color:#DC2626; display:flex; align-items:center; gap:8px;">
+                        <span>Logout</span>
+                      </a>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content p-6 w-full transition-all duration-300">
+            <!-- Header -->
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h1 class="text-xl font-bold text-green-800 ml-10" id="welcome-message">Welcome, User!</h1>
+                    <p class="text-gray-600 text-sm" id="welcome-subtitle">Here's your farming overview for today</p>
+                </div>
+                <div class="flex items-center">
+                    <div class="mr-4">
+                        <p class="text-sm text-gray-600" id="current-date">Loading date...</p>
+                    </div>
+                    <button class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-lg transition duration-300 flex items-center text-sm">
+                        <!-- Fixed SOS icon path -->
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                             xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M12 8v4m0 4h.01M5 20h14M12 2a6 6 0 00-6 6v3l-1 2h14l-1-2V8a6 6 0 00-6-6z"></path>
+                        </svg>
+                        <span id="sos-text">SOS</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Weather Card -->
+            <div class="weather-card rounded-2xl p-5 mb-6">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h2 class="text-lg font-bold text-white mb-2" id="weather-title">Today's Weather</h2>
+                        <p class="text-white text-2xl font-bold" id="weather-temp">-- °C</p>
+                        <p class="text-white opacity-90 text-sm" id="weather-desc">Loading weather data...</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-white font-medium text-sm" id="weather-location">Your Location</p>
+                        <p class="text-white opacity-90 text-xs" id="weather-update">Last updated: --</p>
+                    </div>
+                </div>
+                <div class="mt-4 grid grid-cols-7 gap-2" id="weather-forecast">
+                    <!-- Weather forecast will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Dashboard Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 dashboard-grid">
+                <!-- Market Prices -->
+                <div class="dashboard-card bg-white rounded-2xl p-4">
+                    <div class="flex items-center mb-3">
+                        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                            <span class="text-xl">📈</span>
+                        </div>
+                        <h3 class="font-semibold text-gray-800 text-md" id="market-title">Market Prices</h3>
+                    </div>
+                    <p class="text-gray-600 text-sm mb-3" id="market-subtitle">Track current market trends</p>
+                    <div class="bg-gray-100 p-2 rounded-lg">
+                        <p class="text-xs text-gray-600" id="market-data">Loading market data...</p>
+                    </div>
+                    <button class="w-full mt-3 bg-blue-600 hover:bg-blue-700 text-white font-medium py-1.5 px-3 rounded-lg transition duration-300 text-sm">
+                        <span id="market-button">View Details</span>
+                    </button>
+                </div>
+
+                <!-- Other dashboard cards remain the same -->
+                <!-- Pest Detection -->
+                <div class="dashboard-card bg-white rounded-2xl p-4">
+                    <div class="flex items-center mb-3">
+                        <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center mr-3">
+                            <span class="text-xl">🔍</span>
+                        </div>
+                        <h3 class="font-semibold text-gray-800 text-md" id="pest-title">Pest Detection</h3>
+                    </div>
+                    <p class="text-gray-600 text-sm mb-3" id="pest-subtitle">Identify crop pests</p>
+                    <div class="bg-gray-100 p-2 rounded-lg">
+                        <p class="text-xs text-gray-600" id="pest-data">No recent pest alerts</p>
+                    </div>
+                    <button class="w-full mt-3 bg-red-600 hover:bg-red-700 text-white font-medium py-1.5 px-3 rounded-lg transition duration-300 text-sm">
+                        <span id="pest-button">Scan for Pests</span>
+                    </button>
+                </div>
+
+                <!-- Fertilizer Guide -->
+                <div class="dashboard-card bg-white rounded-2xl p-4">
+                    <div class="flex items-center mb-3">
+                        <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mr-3">
+                            <span class="text-xl">🌿</span>
+                        </div>
+                        <h3 class="font-semibold text-gray-800 text-md" id="fertilizer-title">Fertilizer Guide</h3>
+                    </div>
+                    <p class="text-gray-600 text-sm mb-3" id="fertilizer-subtitle">Smart recommendations</p>
+                    <div class="bg-gray-100 p-2 rounded-lg">
+                        <p class="text-xs text-gray-600" id="fertilizer-data">Get personalized advice</p>
+                    </div>
+                    <button class="w-full mt-3 bg-green-600 hover:bg-green-700 text-white font-medium py-1.5 px-3 rounded-lg transition duration-300 text-sm">
+                        <span id="fertilizer-button">Get Recommendations</span>
+                    </button>
+                </div>
+
+                <!-- Alerts -->
+                <div class="dashboard-card bg-white rounded-2xl p-4">
+                    <div class="flex items-center mb-3">
+                        <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center mr-3">
+                            <span class="text-xl">🚨</span>
+                        </div>
+                        <h3 class="font-semibold text-gray-800 text-md" id="alerts-title">Alerts</h3>
+                    </div>
+                    <p class="text-gray-600 text-sm mb-3" id="alerts-subtitle">Weather & pest risks</p>
+                    <div class="bg-gray-100 p-2 rounded-lg">
+                        <p class="text-xs text-gray-600" id="alerts-data">No active alerts</p>
+                    </div>
+                    <button class="w-full mt-3 bg-yellow-600 hover:bg-yellow-700 text-white font-medium py-1.5 px-3 rounded-lg transition duration-300 text-sm">
+                        <span id="alerts-button">View All Alerts</span>
+                    </button>
+                </div>
+
+                <!-- Crop Recommendation -->
+                <div class="dashboard-card bg-white rounded-2xl p-4">
+                    <div class="flex items-center mb-3">
+                        <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center mr-3">
+                            <span class="text-xl">🌱</span>
+                        </div>
+                        <h3 class="font-semibold text-gray-800 text-md" id="crop-title">Crop Recommendation</h3>
+                    </div>
+                    <p class="text-gray-600 text-sm mb-3" id="crop-subtitle">Best for your soil</p>
+                    <div class="bg-gray-100 p-2 rounded-lg">
+                        <p class="text-xs text-gray-600" id="crop-data">Based on your location</p>
+                    </div>
+                    <button class="w-full mt-3 bg-purple-600 hover:bg-purple-700 text-white font-medium py-1.5 px-3 rounded-lg transition duration-300 text-sm">
+                        <span id="crop-button">Get Recommendations</span>
+                    </button>
+                </div>
+
+                <!-- SMS Chatbot -->
+                <div class="dashboard-card bg-white rounded-2xl p-4">
+                    <div class="flex items-center mb-3">
+                        <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center mr-3">
+                            <span class="text-xl">💬</span>
+                        </div>
+                        <h3 class="font-semibold text-gray-800 text-md" id="chatbot-title">SMS Chatbot</h3>
+                    </div>
+                    <p class="text-gray-600 text-sm mb-3" id="chatbot-subtitle">Works offline</p>
+                    <div class="bg-gray-100 p-2 rounded-lg">
+                        <p class="text-xs text-gray-600" id="chatbot-data">Ask farming questions</p>
+                    </div>
+                    <button class="w-full mt-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-1.5 px-3 rounded-lg transition duration-300 text-sm">
+                        <span id="chatbot-button">Start Chat</span>
+                    </button>
+                </div>
+            </div>
+        </main>
+
+    </div>
+
+    <!-- Voice Assistant Button -->
+    <div class="voice-btn" id="voice-btn">
+        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"
+             xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd"
+                  d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z"
+                  clip-rule="evenodd"></path>
+        </svg>
+    </div>
+
+    <!-- Scroll to Top Button -->
+    <div class="scroll-top-btn" id="scroll-top-btn">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+             xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M5 15l7-7 7 7"></path>
+        </svg>
+    </div>
+
+    <script defer>
+      // script.js
+      // This JS keeps original behaviors and adds mobile sidebar toggle logic.
+      // It is safe to include "defer" in HTML so DOM is ready.
+
+      /* Sidebar toggle logic for mobile */
+      document.addEventListener('DOMContentLoaded', function() {
+          const mobileBtn = document.getElementById('mobile-menu-btn');
+          const sidebar = document.getElementById('sidebar');
+          const overlay = document.getElementById('sidebar-overlay');
+
+          // Helper to open sidebar
+          function openSidebar() {
+              sidebar.classList.add('open');
+              overlay.classList.add('active');
+              // prevent body scroll when sidebar open
+              document.body.style.overflow = 'hidden';
+          }
+
+          // Helper to close sidebar
+          function closeSidebar() {
+              sidebar.classList.remove('open');
+              overlay.classList.remove('active');
+              document.body.style.overflow = '';
+          }
+
+          // Toggle behavior on hamburger click
+          mobileBtn && mobileBtn.addEventListener('click', function() {
+              if (sidebar.classList.contains('open')) {
+                  closeSidebar();
+              } else {
+                  openSidebar();
+              }
+          });
+
+          // Clicking overlay should close sidebar
+          overlay && overlay.addEventListener('click', function() {
+              closeSidebar();
+          });
+
+          // Close sidebar on Escape key
+          document.addEventListener('keydown', function(e) {
+              if (e.key === 'Escape' && sidebar.classList.contains('open')) {
+                  closeSidebar();
+              }
+          });
+
+          /* --- Keep original app logic from the uploaded file below --- */
+          // Language data with translations
+          const languages = {
+              english: {
+                  code: 'en',
+                  name: 'English',
+                  menu: 'Menu',
+                  welcome: "Welcome",
+                  welcomeSub: "Here's your farming overview for today",
+                  dashboard: "Dashboard",
+                  market: "Market Prices",
+                  pest: "Pest Detection",
+                  fertilizer: "Fertilizer Guide",
+                  alerts: "Alerts",
+                  recommendation: "Crop Recommendation",
+                  chatbot: "SMS Chatbot",
+                  history: "Crop History",
+                  settings: "Settings",
+                  logout: "Logout",
+                  sos: "SOS",
+                  weather: "Today's Weather",
+                  marketSub: "Track current market trends",
+                  pestSub: "Identify crop pests",
+                  fertilizerSub: "Smart recommendations",
+                  alertsSub: "Weather & pest risks",
+                  cropSub: "Best for your soil",
+                  chatbotSub: "Works offline",
+                  marketButton: "View Details",
+                  pestButton: "Scan for Pests",
+                  fertilizerButton: "Get Recommendations",
+                  alertsButton: "View All Alerts",
+                  cropButton: "Get Recommendations",
+                  chatbotButton: "Start Chat"
+              },
+              tamil: {
+                  code: 'ta',
+                  name: 'தமிழ்',
+                  menu: 'மெனு',
+                  welcome: "வணக்கம்",
+                  welcomeSub: "இன்று உங்கள் விவசாய கண்ணோட்டம் இங்கே",
+                  dashboard: "டாஷ்போர்டு",
+                  market: "சந்தை விலைகள்",
+                  pest: "பூச்சி கண்டறிதல்",
+                  fertilizer: "உர வழிகாட்டி",
+                  alerts: "எச்சரிக்கைகள்",
+                  recommendation: "பயிர் பரிந்துரை",
+                  chatbot: "SMS சாட்பாட்",
+                  history: "பயிர் வரலாறு",
+                  settings: "அமைப்புகள்",
+                  logout: "வெளியேறு",
+                  sos: "SOS",
+                  weather: "இன்றைய வானிலை",
+                  marketSub: "தற்போதைய சந்தை போக்குகளைக் கண்காணிக்கவும்",
+                  pestSub: "பயிர் பூச்சிகளை அடையாளம் காணுங்கள்",
+                  fertilizerSub: "உர பரிந்துரைகள்",
+                  alertsSub: "வானிலை & பூச்சி அபாயங்கள்",
+                  cropSub: "உங்கள் மண்ணுக்கு சிறந்தது",
+                  chatbotSub: "ஆஃப்லைனில் வேலை செய்கிறது",
+                  marketButton: "விவரங்களைக் காண்க",
+                  pestButton: "பூச்சிகளை ஸ்கேன் செய்யுங்கள்",
+                  fertilizerButton: "பரிந்துரைகளைப் பெறுங்கள்",
+                  alertsButton: "அனைத்து எச்சரிக்கைகளையும் காண்க",
+                  cropButton: "பரிந்துரைகளைப் பெறுங்கள்",
+                  chatbotButton: "அரட்டையைத் தொடங்குங்கள்"
+              },
+              hindi: {
+                  code: 'hi',
+                  name: 'हिंदी',
+                  menu: 'मेनू',
+                  welcome: "स्वागत हे",
+                  welcomeSub: "आज के लिए आपकी खेती का अवलोकन यहाँ है",
+                  dashboard: "डैशबोर्ड",
+                  market: "बाजार मूल्य",
+                  pest: "कीट पहचान",
+                  fertilizer: "उर्वरक गाइड",
+                  alerts: "अलर्ट",
+                  recommendation: "फसल सिफारिश",
+                  chatbot: "एसएमएस चैटबॉट",
+                  history: "फसल इतिहास",
+                  settings: "सेटिंग्स",
+                  logout: "लॉग आउट",
+                  sos: "SOS",
+                  weather: "आज का मौसम",
+                  marketSub: "वर्तमान बाजार के रुझानों को ट्रैक करें",
+                  pestSub: "फसल कीटों की पहचान करें",
+                  fertilizerSub: "स्मार्ट सिफारिशें",
+                  alertsSub: "मौसम और कीट जोखिम",
+                  cropSub: "आपकी मिट्टी के लिए सर्वोत्तम",
+                  chatbotSub: "ऑफलाइन काम करता है",
+                  marketButton: "विवरण देखें",
+                  pestButton: "कीटों के लिए स्कैन करें",
+                  fertilizerButton: "सिफारिशें प्राप्त करें",
+                  alertsButton: "सभी अलर्ट देखें",
+                  cropButton: "सिफारिशें प्राप्त करें",
+                  chatbotButton: "चैट प्रारंभ करें"
+              },
+              bengali: {
+                  code: 'bn',
+                  name: 'বাংলা',
+                  menu: 'মেনু',
+                  welcome: "স্বাগতম",
+                  welcomeSub: "আজকের জন্য আপনার কৃষি ওভারভিউ এখানে",
+                  dashboard: "ড্যাশবোর্ড",
+                  market: "বাজার দাম",
+                  pest: "পোকা সনাক্তকরণ",
+                  fertilizer: "সার গাইড",
+                  alerts: "সতর্কতা",
+                  recommendation: "ফসলের সুপারিশ",
+                  chatbot: "এসএমএস চ্যাটবট",
+                  history: "ফসলের ইতিহাস",
+                  settings: "সেটিংস",
+                  logout: "লগ আউট",
+                  sos: "SOS",
+                  weather: "আজকের আবহাওয়া",
+                  marketSub: "বর্তমান বাজার প্রবণতা ট্র্যাক করুন",
+                  pestSub: "ফসলের পোকামাকড় সনাক্ত করুন",
+                  fertilizerSub: "স্মার্ট সুপারিশ",
+                  alertsSub: "আবহাওয়া এবং কীটপতঙ্গের ঝুঁকি",
+                  cropSub: "আপনার মাটির জন্য সেরা",
+                  chatbotSub: "অফলাইনে কাজ করে",
+                  marketButton: "বিবরণ দেখুন",
+                  pestButton: "পোকার জন্য স্ক্যান করুন",
+                  fertilizerButton: "সুপারিশ পান",
+                  alertsButton: "সমস্ত সতর্কতা দেখুন",
+                  cropButton: "সুপারিশ পান",
+                  chatbotButton: "চ্যাট শুরু করুন"
+              },
+              punjabi: {
+                  code: 'pa',
+                  name: 'ਪੰਜਾਬੀ',
+                  menu: 'ਮੀਨੂ',
+                  welcome: "ਜੀ ਆਇਆਂ ਨੂੰ",
+                  welcomeSub: "ਅੱਜ ਲਈ ਤੁਹਾਡਾ ਖੇਤੀਬਾੜੀ ਦਾ ਝਲਕ ਇੱਥੇ ਹੈ",
+                  dashboard: "ਡੈਸ਼ਬੋਰਡ",
+                  market: "ਮਾਰਕੀਟ ਦੀਆਂ ਕੀਮਤਾਂ",
+                  pest: "ਕੀੜੇ ਦੀ ਪਛਾਣ",
+                  fertilizer: "ਖਾਦ ਗਾਈਡ",
+                  alerts: "ਚੇਤਾਵਨੀਆਂ",
+                  recommendation: "ਫਸਲ ਦੀ ਸਿਫਾਰਸ਼",
+                  chatbot: "SMS ਚੈਟਬੋਟ",
+                  history: "ਫਸਲ ਦਾ ਇਤਿਹਾਸ",
+                  settings: "ਸੈਟਿੰਗਾਂ",
+                  logout: "ਲਾਗ ਆਊਟ",
+                  sos: "SOS",
+                  weather: "ਅੱਜ ਦਾ ਮੌਸਮ",
+                  marketSub: "ਮੌਜੂਦਾ ਮਾਰਕੀਟ ਰੁਝਾਨਾਂ ਨੂੰ ਟਰੈਕ ਕਰੋ",
+                  pestSub: "ਫਸਲ ਦੇ ਕੀੜੇ-ਮਕੌੜੇ ਦੀ ਪਛਾਣ ਕਰੋ",
+                  fertilizerSub: "ਸਮਾਰਟ ਸਿਫਾਰਸ਼ਾਂ",
+                  alertsSub: "ਮੌਸਮ ਅਤੇ ਕੀੜੇ ਦੇ ਖਤਰੇ",
+                  cropSub: "ਤੁਹਾਡੀ ਮਿੱਟੀ ਲਈ ਸਭ ਤੋਂ ਵਧੀਆ",
+                  chatbotSub: "ਔਫਲਾਈਨ ਕੰਮ ਕਰਦਾ ਹੈ",
+                  marketButton: "ਵੇਰਵੇ ਦੇਖੋ",
+                  pestButton: "ਕੀੜੇ ਲਈ ਸਕੈਨ ਕਰੋ",
+                  fertilizerButton: "ਸਿਫਾਰਸ਼ਾਂ ਪ੍ਰਾਪਤ ਕਰੋ",
+                  alertsButton: "ਸਾਰੀਆਂ ਚੇਤਾਵਨੀਆਂ ਦੇਖੋ",
+                  cropButton: "ਸਿਫਾਰਸ਼ਾਂ ਪ੍ਰਾਪਤ ਕਰੋ",
+                  chatbotButton: "ਗੱਲਬਾਤ ਸ਼ੁਰੂ ਕਰੋ"
+              }
+          };
+
+          // Get user data from localStorage or default values
+          const userName = localStorage.getItem('userName') || 'Farmer';
+          const userLocation = localStorage.getItem('userLocation') || 'Farmland';
+          const selectedLanguage = localStorage.getItem('selectedLanguage') || 'english';
+          const langData = languages[selectedLanguage];
+
+          // Update UI with user data and translations
+          // Note: some referenced elements might not exist in DOM in original file; guard them.
+          const elById = id => document.getElementById(id);
+          if (elById('user-name')) elById('user-name').textContent = userName;
+          if (elById('user-initial')) elById('user-initial').textContent = userName.charAt(0);
+          if (elById('welcome-message')) elById('welcome-message').textContent = `${langData.welcome}, ${userName}!`;
+          if (elById('welcome-subtitle')) elById('welcome-subtitle').textContent = langData.welcomeSub;
+          if (elById('weather-location')) elById('weather-location').textContent = userLocation;
+          if (elById('menu-title')) elById('menu-title').textContent = langData.menu;
+
+          // Update navigation items
+          if (elById('nav-dashboard')) elById('nav-dashboard').textContent = langData.dashboard;
+          if (elById('nav-market')) elById('nav-market').textContent = langData.market;
+          if (elById('nav-pest')) elById('nav-pest').textContent = langData.pest;
+          if (elById('nav-fertilizer')) elById('nav-fertilizer').textContent = langData.fertilizer;
+          if (elById('nav-alerts')) elById('nav-alerts').textContent = langData.alerts;
+          if (elById('nav-recommendation')) elById('nav-recommendation').textContent = langData.recommendation;
+          if (elById('nav-chatbot')) elById('nav-chatbot').textContent = langData.chatbot;
+          if (elById('nav-history')) elById('nav-history').textContent = langData.history;
+          if (elById('nav-settings')) elById('nav-settings').textContent = langData.settings;
+          if (elById('nav-logout')) elById('nav-logout').textContent = langData.logout;
+          if (elById('sos-text')) elById('sos-text').textContent = langData.sos;
+
+          // Update dashboard items
+          if (elById('weather-title')) elById('weather-title').textContent = langData.weather;
+          if (elById('market-title')) elById('market-title').textContent = langData.market;
+          if (elById('market-subtitle')) elById('market-subtitle').textContent = langData.marketSub;
+          if (elById('market-button')) elById('market-button').textContent = langData.marketButton;
+          if (elById('pest-title')) elById('pest-title').textContent = langData.pest;
+          if (elById('pest-subtitle')) elById('pest-subtitle').textContent = langData.pestSub;
+          if (elById('pest-button')) elById('pest-button').textContent = langData.pestButton;
+          if (elById('fertilizer-title')) elById('fertilizer-title').textContent = langData.fertilizer;
+          if (elById('fertilizer-subtitle')) elById('fertilizer-subtitle').textContent = langData.fertilizerSub;
+          if (elById('fertilizer-button')) elById('fertilizer-button').textContent = langData.fertilizerButton;
+          if (elById('alerts-title')) elById('alerts-title').textContent = langData.alerts;
+          if (elById('alerts-subtitle')) elById('alerts-subtitle').textContent = langData.alertsSub;
+          if (elById('alerts-button')) elById('alerts-button').textContent = langData.alertsButton;
+          if (elById('crop-title')) elById('crop-title').textContent = langData.recommendation;
+          if (elById('crop-subtitle')) elById('crop-subtitle').textContent = langData.cropSub;
+          if (elById('crop-button')) elById('crop-button').textContent = langData.cropButton;
+          if (elById('chatbot-title')) elById('chatbot-title').textContent = langData.chatbot;
+          if (elById('chatbot-subtitle')) elById('chatbot-subtitle').textContent = langData.chatbotSub;
+          if (elById('chatbot-button')) elById('chatbot-button').textContent = langData.chatbotButton;
+
+          // Set current date in DD/MM/YYYY format
+          const now = new Date();
+          const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+          if (elById('current-date')) elById('current-date').textContent = now.toLocaleDateString(selectedLanguage, options);
+
+          // Logout functionality
+          if (elById('nav-logout')) {
+              elById('nav-logout').addEventListener('click', function(e) {
+                  e.preventDefault();
+                  // Clear user data from localStorage
+                  localStorage.removeItem('userName');
+                  localStorage.removeItem('userLocation');
+                  localStorage.removeItem('selectedLanguage');
+
+                  // Redirect to authentication page (replace with your actual auth page URL)
+                  window.location.href = 'Language-selection.html';
+              });
+          }
+
+          // Voice assistant functionality
+          const voiceBtn = elById('voice-btn');
+          if (voiceBtn) {
+              voiceBtn.addEventListener('click', function() {
+                  this.classList.toggle('listening');
+                  // Add your voice recognition logic here
+                  alert('Voice assistant activated! This would connect to your voice recognition system.');
+
+                  // For demonstration, toggle off after 3 seconds
+                  setTimeout(() => {
+                      this.classList.remove('listening');
+                  }, 3000);
+              });
+          }
+
+          // Scroll to top button functionality
+          const scrollTopBtn = elById('scroll-top-btn');
+
+          window.addEventListener('scroll', function() {
+              if (!scrollTopBtn) return;
+              if (window.pageYOffset > 300) {
+                  scrollTopBtn.classList.add('visible');
+              } else {
+                  scrollTopBtn.classList.remove('visible');
+              }
+          });
+
+          if (scrollTopBtn) {
+              scrollTopBtn.addEventListener('click', function() {
+                  window.scrollTo({
+                      top: 0,
+                      behavior: 'smooth'
+                  });
+              });
+          }
+
+          // Simulate weather data (replace with actual API call)
+          setTimeout(() => {
+              if (elById('weather-temp')) elById('weather-temp').textContent = '28°C';
+              if (elById('weather-desc')) elById('weather-desc').textContent = 'Partly Cloudy';
+              if (elById('weather-update')) elById('weather-update').textContent = 'Last updated: ' + now.toLocaleTimeString();
+
+              // Simulate forecast
+              const forecastContainer = elById('weather-forecast');
+              const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+              if (selectedLanguage === 'tamil') {
+                  days.splice(0, days.length, 'ஞாயிறு', 'திங்கள்', 'செவ்வாய்', 'புதன்', 'வியாழன்', 'வெள்ளி', 'சனி');
+              } else if (selectedLanguage === 'hindi') {
+                  days.splice(0, days.length, 'रवि', 'सोम', 'मंगल', 'बुध', 'गुरु', 'शुक्र', 'शनि');
+              } else if (selectedLanguage === 'bengali') {
+                  days.splice(0, days.length, 'রবি', 'সোম', 'মঙ্গল', 'বুধ', 'বৃহস্পতি', 'শুক্র', 'শনি');
+              } else if (selectedLanguage === 'punjabi') {
+                  days.splice(0, days.length, 'ਐਤਵਾਰ', 'ਸੋਮਵਾਰ', 'ਮੰਗਲਵਾਰ', 'ਬੁੱਧਵਾਰ', 'ਵੀਰਵਾਰ', 'ਸ਼ੁੱਕਰਵਾਰ', 'ਸ਼ਨੀਚਰਵਾਰ');
+              }
+
+              if (forecastContainer) {
+                  days.forEach(day => {
+                      const temp = Math.floor(Math.random() * 10) + 20; // Random temp between 20-30
+                      const div = document.createElement('div');
+                      div.className = 'text-center';
+                      div.innerHTML = `<p class="text-white text-xs">${day}</p>
+                                      <p class="text-white font-bold text-sm">${temp}°C</p>`;
+                      forecastContainer.appendChild(div);
+                  });
+              }
+          }, 1500);
+      });
+    </script>
+</body>
+</html>
